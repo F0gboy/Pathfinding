@@ -11,6 +11,7 @@ namespace Pathfinding_Project
 {
     public class GameManager
     {
+        #region
         private readonly Map _map;
         private readonly Hero _hero;
         private readonly Statue _statue;
@@ -37,6 +38,7 @@ namespace Pathfinding_Project
         private readonly Rock _rock6;
         private readonly Rock _rock7;
         private readonly Rock _rock8;
+        #endregion
 
         private Thread WorkerThread;
 
@@ -55,8 +57,8 @@ namespace Pathfinding_Project
 
             _bricks1 = new(Globals.Content.Load<Texture2D>("bricks"), _map.Tiles[0, 0].Position + new Vector2(15, 20));
             _bricks1.TilePos = new Vector2(0, 0);
-            _bricks2 = new(Globals.Content.Load<Texture2D>("bricks"), _map.Tiles[8, 0].Position + new Vector2(15, 20));
-            _bricks2.TilePos = new Vector2(8, 0);
+            _bricks2 = new(Globals.Content.Load<Texture2D>("bricks"), _map.Tiles[9, 9].Position + new Vector2(15, 20));
+            _bricks2.TilePos = new Vector2(9, 9);
 
             _tree1 = new(Globals.Content.Load<Texture2D>("Bush"), _map.Tiles[3, 6].Position + new Vector2(8, 8));
             _tree2 = new(Globals.Content.Load<Texture2D>("Bush"), _map.Tiles[4, 6].Position + new Vector2(8, 8));
@@ -104,10 +106,59 @@ namespace Pathfinding_Project
 
         public void Worker()
         {
-            while (true)
+            while (_monument.Energy == false)
             {
-                Pathfinder.BFSearch(2, 2);
-                Thread.Sleep(1000);
+                Thread.Sleep(2000);
+
+                GetEnergy();
+
+                DeliverEnergy();
+
+                GoToPortal();
+            }
+        }
+
+        public void GetEnergy()
+        {
+            while (_hero.Energy == false)
+            {
+                if (_hero.bricksForStatue == true)
+                {
+                    Pathfinder.BFSearch((int)_statue.TilePos.X, (int)_statue.TilePos.Y);
+                    Thread.Sleep(5000);
+                    _hero.Energy = true;
+                }
+                else
+                {
+                    Pathfinder.BFSearch((int)_bricks1.TilePos.X, (int)_bricks1.TilePos.Y);
+                    _hero.bricksForStatue = true;
+                    Thread.Sleep(5000);
+                }
+            }
+        }
+
+        public void GoToPortal()
+        {
+            Pathfinder.BFSearch((int)_portal.TilePos.X, (int)_portal.TilePos.Y);
+        }
+
+        public void DeliverEnergy()
+        {
+            while (_monument.Energy == false)
+            {
+                if (_hero.bricksForMonument == true)
+                {
+                    Pathfinder.BFSearch((int)_monument.TilePos.X, (int)_monument.TilePos.Y);
+                    Thread.Sleep(5000);
+                    _hero.Energy = false;
+                    _monument.Energy = true;
+                }
+                else
+                {
+                    Pathfinder.BFSearch((int)_bricks2.TilePos.X, (int)_bricks2.TilePos.Y);
+                    _hero.bricksForMonument = true;
+                    Thread.Sleep(5000);
+                }
             }
         }
 
@@ -116,6 +167,11 @@ namespace Pathfinding_Project
             InputManager.Update();
             _map.Update();
             _hero.Update();
+
+            if ()
+            {
+
+            }
         }
 
         public void Draw()

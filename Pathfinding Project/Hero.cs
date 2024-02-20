@@ -16,9 +16,15 @@ namespace Pathfinding_Project
         public List<Vector2> Path { get; private set; }
         private int _current;
 
+        public bool bricksForStatue = false;
+
+        public bool bricksForMonument = false;
+
+        public bool Energy = false;
+
         public Hero(Texture2D tex, Vector2 pos) : base(tex, pos)
         {
-            speed = 600;
+            speed = 300;
             DestinationPosition = pos;
             MoveDone = true;
         }

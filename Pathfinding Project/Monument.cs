@@ -11,6 +11,9 @@ namespace Pathfinding_Project
     internal class Monument : Sprite
     {
         public Vector2 TilePos { get; set; }
+
+        public bool Energy;
+
         public Monument(Texture2D texture, Vector2 pos) : base(texture, pos)
         {
             this.Position = pos;
