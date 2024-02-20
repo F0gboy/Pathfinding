@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pathfinding_Project
@@ -13,6 +14,12 @@ namespace Pathfinding_Project
         private readonly Map _map;
         private readonly Hero _hero;
         private readonly Statue _statue;
+        private readonly Portal _portal;
+        private readonly Monument _monument;
+
+        private readonly Bricks _bricks1;
+        private readonly Bricks _bricks2;
+
         private readonly Tree _tree1;
         private readonly Tree _tree2;
         private readonly Tree _tree3;
@@ -31,11 +38,26 @@ namespace Pathfinding_Project
         private readonly Rock _rock7;
         private readonly Rock _rock8;
 
+        private Thread WorkerThread;
+
         public GameManager()
         {
+            #region
             _map = new();
             _hero = new(Globals.Content.Load<Texture2D>("hero"), _map.Tiles[1, 7].Position);
+
             _statue = new(Globals.Content.Load<Texture2D>("statue"), _map.Tiles[2,2].Position + new Vector2(13, -8));
+            _statue.TilePos = new Vector2(2, 2);
+            _portal = new(Globals.Content.Load<Texture2D>("portal"), _map.Tiles[0, 7].Position + new Vector2(-20, 0));
+            _portal.TilePos = new Vector2(0, 7);
+            _monument = new(Globals.Content.Load<Texture2D>("monument"), _map.Tiles[8, 7].Position + new Vector2(5, 5));
+            _monument.TilePos = new Vector2(8, 7);
+
+            _bricks1 = new(Globals.Content.Load<Texture2D>("bricks"), _map.Tiles[0, 0].Position + new Vector2(15, 20));
+            _bricks1.TilePos = new Vector2(0, 0);
+            _bricks2 = new(Globals.Content.Load<Texture2D>("bricks"), _map.Tiles[8, 0].Position + new Vector2(15, 20));
+            _bricks2.TilePos = new Vector2(8, 0);
+
             _tree1 = new(Globals.Content.Load<Texture2D>("Bush"), _map.Tiles[3, 6].Position + new Vector2(8, 8));
             _tree2 = new(Globals.Content.Load<Texture2D>("Bush"), _map.Tiles[4, 6].Position + new Vector2(8, 8));
             _tree3 = new(Globals.Content.Load<Texture2D>("Bush"), _map.Tiles[5, 6].Position + new Vector2(8, 8));
@@ -54,7 +76,7 @@ namespace Pathfinding_Project
             _rock7 = new(Globals.Content.Load<Texture2D>("rock"), _map.Tiles[7, 3].Position + new Vector2(2, 6));
             _rock8 = new(Globals.Content.Load<Texture2D>("rock"), _map.Tiles[7, 2].Position + new Vector2(2, 6));
 
-            _map.Tiles[2, 2].Blocked = true;
+            //_map.Tiles[2, 2].Blocked = true;
             _map.Tiles[4, 6].Blocked = true;
             _map.Tiles[5, 6].Blocked = true;
             _map.Tiles[6, 6].Blocked = true;
@@ -71,8 +93,22 @@ namespace Pathfinding_Project
             _map.Tiles[7, 4].Blocked = true;
             _map.Tiles[7, 3].Blocked = true;
             _map.Tiles[7, 2].Blocked = true;
+            #endregion
 
             Pathfinder.Init(_map, _hero);
+
+            WorkerThread = new Thread(Worker);
+            WorkerThread.IsBackground = true;
+            WorkerThread.Start();
+        }
+
+        public void Worker()
+        {
+            while (true)
+            {
+                Pathfinder.BFSearch(2, 2);
+                Thread.Sleep(1000);
+            }
         }
 
         public void Update()
@@ -85,9 +121,18 @@ namespace Pathfinding_Project
         public void Draw()
         {
             Globals.SpriteBatch.Begin();
+
+            #region
             _map.Draw();
-            _hero.Draw();
+            _portal.Draw();
             _statue.Draw();
+            _monument.Draw();
+
+            _bricks1.Draw();
+            _bricks2.Draw();
+
+            _hero.Draw();
+
             _tree1.Draw();
             _tree2.Draw();
             _tree3.Draw();
@@ -96,6 +141,7 @@ namespace Pathfinding_Project
             _tree6.Draw();
             _tree7.Draw();
             _tree8.Draw();
+
             _rock1.Draw();
             _rock2.Draw();
             _rock3.Draw();
@@ -104,6 +150,8 @@ namespace Pathfinding_Project
             _rock6.Draw();
             _rock7.Draw();
             _rock8.Draw();
+            #endregion
+
             Globals.SpriteBatch.End();
         }
     }

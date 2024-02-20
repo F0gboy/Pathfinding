@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace Pathfinding_Project
 {
-    internal class Portal : Sprite
+    internal class Monument : Sprite
     {
         public Vector2 TilePos { get; set; }
-        public Portal(Texture2D texture, Vector2 pos) : base(texture, pos)
+        public Monument(Texture2D texture, Vector2 pos) : base(texture, pos)
         {
             this.Position = pos;
         }
