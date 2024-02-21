@@ -95,6 +95,10 @@ namespace Pathfinding_Project
             _map.Tiles[7, 4].Blocked = true;
             _map.Tiles[7, 3].Blocked = true;
             _map.Tiles[7, 2].Blocked = true;
+            _map.Tiles[3, 9].Blocked = true;
+            _map.Tiles[4, 9].Blocked = true;
+            _map.Tiles[5, 9].Blocked = true;
+            _map.Tiles[6, 9].Blocked = true;
             #endregion
 
             Pathfinder.Init(_map, _hero);
@@ -167,11 +171,6 @@ namespace Pathfinding_Project
             InputManager.Update();
             _map.Update();
             _hero.Update();
-
-            if ()
-            {
-
-            }
         }
 
         public void Draw()
