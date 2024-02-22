@@ -1,9 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Pathfinding_Project.Pathfinding_Project;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Pathfinding_Project
 {
@@ -12,13 +14,24 @@ namespace Pathfinding_Project
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private GameManager _gameManager;
+        public bool startGame = false;
+
+        private Button button1;
+        private Button button2;
+
+        private GameWorld _gameWorld;
+
+        SpriteFont font;
+
 
         public GameWorld()
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            _gameWorld = this;
         }
+
 
         protected override void Initialize()
         {
@@ -29,121 +42,40 @@ namespace Pathfinding_Project
             _graphics.PreferredBackBufferHeight = Globals.WindowSize.Y;
             _graphics.ApplyChanges();
 
+            Texture2D buttonTexture = Content.Load<Texture2D>("StoneGround");
+            Rectangle buttonRectangle = new Rectangle(100, 100, buttonTexture.Width, buttonTexture.Height);
+            button1 = new Button(buttonTexture, buttonRectangle);
+
+            Rectangle buttonRectangle2 = new Rectangle(400, 100, buttonTexture.Width, buttonTexture.Height);
+            button2 = new Button(buttonTexture, buttonRectangle2);
+
             Globals.Content = Content;
             _gameManager = new();
-
-            /*/
-            //Graph<string> graph = new Graph<string>();
-
-            //graph.AddNode("Entrance");
-            //graph.AddNode("Ice Blaster");
-            //graph.AddNode("Slot Machines");
-            //graph.AddNode("Funhouse");
-            //graph.AddNode("Rocket Ships");
-            //graph.AddNode("Hotdogs");
-            //graph.AddNode("Log Flume");
-            //graph.AddNode("Big Dipper");
-            //graph.AddNode("Rollercoaster");
-            //graph.AddNode("Ghost Train");
-            //graph.AddNode("Carousel");
-            //graph.AddNode("Flying Chairs");
-            //graph.AddNode("3D Cinema");
-            //graph.AddNode("Pirate Ship");
-
-            //graph.AddEdge("Entrance", "Ice Blaster");
-            //graph.AddEdge("Entrance", "Funhouse");
-            //graph.AddEdge("Entrance", "Slot Machines");
-
-            //graph.AddEdge("Ice Blaster", "Funhouse");
-            //graph.AddEdge("Ice Blaster", "Slot Machines");
-            //graph.AddEdge("Ice Blaster", "Rocket Ships");
-            //graph.AddEdge("Ice Blaster", "3D Cinema");
-
-            //graph.AddEdge("Slot Machines", "Rocket Ships");
-            //graph.AddEdge("Slot Machines", "Hotdogs");
-
-            //graph.AddEdge("Hotdogs", "Log Flume");
-
-            //graph.AddEdge("Log Flume", "Big Dipper");
-
-            //graph.AddEdge("Big Dipper", "Ghost Train");
-            //graph.AddEdge("Big Dipper", "Rollercoaster");
-
-            //graph.AddEdge("Ghost Train", "Carousel");
-            //graph.AddEdge("Ghost Train", "Flying Chairs");
-
-            //graph.AddEdge("Rocket Ships", "3D Cinema");
-            //graph.AddEdge("Rocket Ships", "Ghost Train");
-
-            //graph.AddEdge("Funhouse", "3D Cinema");
-
-            //graph.AddEdge("3D Cinema", "Pirate Ship");
-
-            //Node<string> n = DFS<string>(graph.Nodes.Find(x => x.Data == "Entrance"), graph.Nodes.Find(x => x.Data == "Ghost Train"));
-
-            //List<Node<string>> path = TrackPath<string>(n, graph.Nodes.Find(x => x.Data == "Entrance"));
-
-            //foreach (Node<string> pathNode in path)
-            //{
-            //    Debug.WriteLine(pathNode.Data);
-            //}
-            /*/
 
             base.Initialize();
         }
 
-        //private static Pathfinder<T> DFS<T>(Pathfinder<T> start, Pathfinder<T> goal)
-        //{
-        //    Stack<Edge<T>> edges = new Stack<Edge<T>>();
-        //    edges.Push(new Edge<T>(start, start));
+        public async Task ButtonClickedAsync()
+        {
+            _gameManager.StartGame = true;
+            startGame = true;
 
-        //    while (edges.Count > 0)
-        //    {
-        //        Edge<T> edge = edges.Pop();
+            await Task.Run(() => _gameManager.WorkerBFS());
+        }
 
-        //        if (!edge.To.Visited)
-        //        {
-        //            edge.To.Visited = true;
-        //            edge.To.Parent = edge.From;
-        //        }
-        //        if (edge.To == goal)
-        //        {
-        //            return edge.To;
-        //        }
+        public async Task ButtonClickedAsync2()
+        {
+            _gameManager.StartGame = true;
+            startGame = true;
 
-        //        foreach (Edge<T> e in edge.To.Edges)
-        //        {
-        //            if (!e.To.Visited)
-        //            {
-        //                edges.Push(e);
-        //            }
-        //        }
-        //    }
-
-        //    return null;
-        //}
-
-        //private static List<Pathfinder<T>> TrackPath<T>(Pathfinder<T> node, Pathfinder<T> start)
-        //{
-        //    List<Pathfinder<T>> path = new List<Pathfinder<T>>();
-
-        //    while (!node.Equals(start))
-        //    {
-        //        path.Add(node);
-        //        node = node.Parent;
-        //    }
-
-        //    path.Add(start);
-
-        //    path.Reverse();
-
-        //    return path;
-        //}
+            await Task.Run(() => _gameManager.WorkerAstar());
+        }
 
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             Globals.SpriteBatch = _spriteBatch;
+            font = Content.Load<SpriteFont>("font");
 
             // TODO: use this.Content to load your game content here
         }
@@ -154,7 +86,18 @@ namespace Pathfinding_Project
                 Exit();
 
             Globals.Update(gameTime);
-            _gameManager.Update();
+
+            startGame = _gameManager.StartGame;
+
+            if (startGame == true)
+            {
+                _gameManager.Update();
+            }
+            else
+            {
+                button1.Update(this);
+                button2.Update(this);
+            }
 
             // TODO: Add your update logic here
 
@@ -165,7 +108,22 @@ namespace Pathfinding_Project
         {
             GraphicsDevice.Clear(Color.Black);
 
-            _gameManager.Draw();
+            if (startGame == true)
+            {
+                _gameManager.Draw();
+            }
+            else
+            {
+                _spriteBatch.Begin();
+
+                button1.Draw(_spriteBatch);
+                _spriteBatch.DrawString(font, "DFS", new Vector2(130, 130), Color.White);
+
+                button2.Draw(_spriteBatch);
+                _spriteBatch.DrawString(font, "a*", new Vector2(430, 130), Color.White);
+
+                _spriteBatch.End();
+            }
 
             base.Draw(gameTime);
         }

@@ -101,6 +101,58 @@ namespace Pathfinding_Project
             return null;
         }
 
+        public static List<Vector2> AStarPathfinding(int goalX, int goalY)
+        {
+            CreateNodeMap();
+            List<Node> openList = new List<Node>();
+            HashSet<Node> closedList = new HashSet<Node>();
+
+            (int startX, int startY) = ScreenToMap(_hero.Position);
+            var start = _nodeMap[startX, startY];
+            start.visited = true;
+            openList.Add(start);
+
+            while (openList.Count > 0)
+            {
+                Node current = openList.OrderBy(node => node.x + node.y + Heuristic(node.x, node.y, goalX, goalY)).First();
+
+                if (current.x == goalX && current.y == goalY)
+                {
+                    return RetracePath(goalX, goalY);
+                }
+
+                openList.Remove(current);
+                closedList.Add(current);
+
+                for (int i = 0; i < row.Length; i++)
+                {
+                    int newX = current.x + row[i];
+                    int newY = current.y + col[i];
+
+                    if (IsValid(newX, newY) && !_nodeMap[newX, newY].visited && !_map.Tiles[newX, newY].Blocked)
+                    {
+                        Node neighbor = _nodeMap[newX, newY];
+                        if (closedList.Contains(neighbor)) continue;
+
+                        neighbor.parent = current;
+
+                        if (!openList.Contains(neighbor))
+                        {
+                            openList.Add(neighbor);
+                            _nodeMap[newX, newY].visited = true;
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private static int Heuristic(int x, int y, int goalX, int goalY)
+        {
+            return Math.Abs(x - goalX) + Math.Abs(y - goalY);
+        }
+
         private static List<Vector2> RetracePath(int goalX, int goalY)
         {
             Stack<Vector2> stack = new();

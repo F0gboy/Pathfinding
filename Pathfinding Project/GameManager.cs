@@ -17,9 +17,13 @@ namespace Pathfinding_Project
         private readonly Statue _statue;
         private readonly Portal _portal;
         private readonly Monument _monument;
+        public bool StartGame = false;
 
         private readonly Bricks _bricks1;
         private readonly Bricks _bricks2;
+
+        private Texture2D TreeTexture;
+        private Texture2D RockTexture;
 
         private readonly Tree _tree1;
         private readonly Tree _tree2;
@@ -40,8 +44,6 @@ namespace Pathfinding_Project
         private readonly Rock _rock8;
         #endregion
 
-        private Thread WorkerThread;
-
         public GameManager()
         {
             #region
@@ -60,23 +62,26 @@ namespace Pathfinding_Project
             _bricks2 = new(Globals.Content.Load<Texture2D>("bricks"), _map.Tiles[9, 9].Position + new Vector2(15, 20));
             _bricks2.TilePos = new Vector2(9, 9);
 
-            _tree1 = new(Globals.Content.Load<Texture2D>("Bush"), _map.Tiles[3, 6].Position + new Vector2(8, 8));
-            _tree2 = new(Globals.Content.Load<Texture2D>("Bush"), _map.Tiles[4, 6].Position + new Vector2(8, 8));
-            _tree3 = new(Globals.Content.Load<Texture2D>("Bush"), _map.Tiles[5, 6].Position + new Vector2(8, 8));
-            _tree4 = new(Globals.Content.Load<Texture2D>("Bush"), _map.Tiles[6, 6].Position + new Vector2(8, 8));
-            _tree5 = new(Globals.Content.Load<Texture2D>("Bush"), _map.Tiles[3, 8].Position + new Vector2(8, 8));
-            _tree6 = new(Globals.Content.Load<Texture2D>("Bush"), _map.Tiles[4, 8].Position + new Vector2(8, 8));
-            _tree7 = new(Globals.Content.Load<Texture2D>("Bush"), _map.Tiles[5, 8].Position + new Vector2(8, 8));
-            _tree8 = new(Globals.Content.Load<Texture2D>("Bush"), _map.Tiles[6, 8].Position + new Vector2(8, 8));
+            TreeTexture = Globals.Content.Load<Texture2D>("Bush");
+            RockTexture = Globals.Content.Load<Texture2D>("rock");
 
-            _rock1 = new(Globals.Content.Load<Texture2D>("rock"), _map.Tiles[6, 5].Position + new Vector2(2, 6));
-            _rock2 = new(Globals.Content.Load<Texture2D>("rock"), _map.Tiles[6, 4].Position + new Vector2(2, 6));
-            _rock3 = new(Globals.Content.Load<Texture2D>("rock"), _map.Tiles[6, 3].Position + new Vector2(2, 6));
-            _rock4 = new(Globals.Content.Load<Texture2D>("rock"), _map.Tiles[6, 2].Position + new Vector2(2, 6));
-            _rock5 = new(Globals.Content.Load<Texture2D>("rock"), _map.Tiles[7, 5].Position + new Vector2(2, 6));
-            _rock6 = new(Globals.Content.Load<Texture2D>("rock"), _map.Tiles[7, 4].Position + new Vector2(2, 6));
-            _rock7 = new(Globals.Content.Load<Texture2D>("rock"), _map.Tiles[7, 3].Position + new Vector2(2, 6));
-            _rock8 = new(Globals.Content.Load<Texture2D>("rock"), _map.Tiles[7, 2].Position + new Vector2(2, 6));
+            _tree1 = new(TreeTexture, _map.Tiles[3, 6].Position + new Vector2(8, 8));
+            _tree2 = new(TreeTexture, _map.Tiles[4, 6].Position + new Vector2(8, 8));
+            _tree3 = new(TreeTexture, _map.Tiles[5, 6].Position + new Vector2(8, 8));
+            _tree4 = new(TreeTexture, _map.Tiles[6, 6].Position + new Vector2(8, 8));
+            _tree5 = new(TreeTexture, _map.Tiles[3, 8].Position + new Vector2(8, 8));
+            _tree6 = new(TreeTexture, _map.Tiles[4, 8].Position + new Vector2(8, 8));
+            _tree7 = new(TreeTexture, _map.Tiles[5, 8].Position + new Vector2(8, 8));
+            _tree8 = new(TreeTexture, _map.Tiles[6, 8].Position + new Vector2(8, 8));
+
+            _rock1 = new(RockTexture, _map.Tiles[6, 5].Position + new Vector2(2, 6));
+            _rock2 = new(RockTexture, _map.Tiles[6, 4].Position + new Vector2(2, 6));
+            _rock3 = new(RockTexture, _map.Tiles[6, 3].Position + new Vector2(2, 6));
+            _rock4 = new(RockTexture, _map.Tiles[6, 2].Position + new Vector2(2, 6));
+            _rock5 = new(RockTexture, _map.Tiles[7, 5].Position + new Vector2(2, 6));
+            _rock6 = new(RockTexture, _map.Tiles[7, 4].Position + new Vector2(2, 6));
+            _rock7 = new(RockTexture, _map.Tiles[7, 3].Position + new Vector2(2, 6));
+            _rock8 = new(RockTexture, _map.Tiles[7, 2].Position + new Vector2(2, 6));
 
             //_map.Tiles[2, 2].Blocked = true;
             _map.Tiles[4, 6].Blocked = true;
@@ -102,27 +107,50 @@ namespace Pathfinding_Project
             #endregion
 
             Pathfinder.Init(_map, _hero);
-
-            WorkerThread = new Thread(Worker);
-            WorkerThread.IsBackground = true;
-            WorkerThread.Start();
         }
 
-        public void Worker()
+        public void WorkerBFS()
         {
-            while (_monument.Energy == false)
-            {
-                Thread.Sleep(2000);
+            Thread.Sleep(2000);
 
-                GetEnergy();
+            GetEnergyBFS();
 
-                DeliverEnergy();
+            DeliverEnergyBFS();
 
-                GoToPortal();
-            }
+            GoToPortalBFS();
+
+            Thread.Sleep(7000);
+
+            _monument.Energy = false;
+            _hero.Energy = false;
+            _hero.bricksForStatue = false;
+            _hero.bricksForMonument = false;
+                
+            StartGame = false;
         }
 
-        public void GetEnergy()
+        public void WorkerAstar()
+        {
+            Thread.Sleep(2000);
+
+            GetEnergyAstar();
+
+            DeliverEnergyAstar();
+
+            GoToPortalAstar();
+
+            Thread.Sleep(7000);
+
+            _monument.Energy = false;
+            _hero.Energy = false;
+            _hero.bricksForStatue = false;
+            _hero.bricksForMonument = false;
+
+            StartGame = false;
+            
+        }
+
+        public void GetEnergyBFS()
         {
             while (_hero.Energy == false)
             {
@@ -141,12 +169,12 @@ namespace Pathfinding_Project
             }
         }
 
-        public void GoToPortal()
+        public void GoToPortalBFS()
         {
             Pathfinder.BFSearch((int)_portal.TilePos.X, (int)_portal.TilePos.Y);
         }
 
-        public void DeliverEnergy()
+        public void DeliverEnergyBFS()
         {
             while (_monument.Energy == false)
             {
@@ -160,6 +188,54 @@ namespace Pathfinding_Project
                 else
                 {
                     Pathfinder.BFSearch((int)_bricks2.TilePos.X, (int)_bricks2.TilePos.Y);
+                    Thread.Sleep(1600);
+                    _map.Tiles[5, 7].Blocked = true;
+                    _hero.bricksForMonument = true;
+                    Thread.Sleep(5000);
+                }
+            }
+        }
+
+        public void GetEnergyAstar()
+        {
+            while (_hero.Energy == false)
+            {
+                if (_hero.bricksForStatue == true)
+                {
+                    Pathfinder.AStarPathfinding((int)_statue.TilePos.X, (int)_statue.TilePos.Y);
+                    Thread.Sleep(5000);
+                    _hero.Energy = true;
+                }
+                else
+                {
+                    Pathfinder.AStarPathfinding((int)_bricks1.TilePos.X, (int)_bricks1.TilePos.Y);
+                    _hero.bricksForStatue = true;
+                    Thread.Sleep(5000);
+                }
+            }
+        }
+
+        public void GoToPortalAstar()
+        {
+            Pathfinder.AStarPathfinding((int)_portal.TilePos.X, (int)_portal.TilePos.Y);
+        }
+
+        public void DeliverEnergyAstar()
+        {
+            while (_monument.Energy == false)
+            {
+                if (_hero.bricksForMonument == true)
+                {
+                    Pathfinder.AStarPathfinding((int)_monument.TilePos.X, (int)_monument.TilePos.Y);
+                    Thread.Sleep(5000);
+                    _hero.Energy = false;
+                    _monument.Energy = true;
+                }
+                else
+                {
+                    Pathfinder.AStarPathfinding((int)_bricks2.TilePos.X, (int)_bricks2.TilePos.Y);
+                    Thread.Sleep(1600);
+                    _map.Tiles[5, 7].Blocked = true;
                     _hero.bricksForMonument = true;
                     Thread.Sleep(5000);
                 }

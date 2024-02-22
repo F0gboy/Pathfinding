@@ -40,11 +40,6 @@ namespace Pathfinding_Project
             Color = Path ? Microsoft.Xna.Framework.Color.Green : Microsoft.Xna.Framework.Color.White;
             Color = Blocked ? Microsoft.Xna.Framework.Color.Red : Color;
         }
-
-        //public override void Draw()
-        //{
-        //    Globals.SpriteBatch.Draw(texture, position, null, Color, 0f, Origin, 1f, SpriteEffects.None, 0f);
-        //}
     }
 }
 
